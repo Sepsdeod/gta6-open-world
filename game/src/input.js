@@ -1,49 +1,61 @@
-// Keyboard and pointer input. Held keys give a steering direction; one-shot presses (start or
-// restart, pause) are queued as bit flags and taken once by the loop, so a press between two
-// frames is never lost and never counted twice.
+// Keyboard and mouse input. Held keys give movement and steering; one-shot
+// presses (enter a car, shoot, pause, save, mute) are queued as bit flags and
+// taken once by the loop, so a press between two frames is never lost.
+export const ACTION_ENTER = 1;
+export const ACTION_SHOOT = 2;
+export const ACTION_PAUSE = 4;
+export const ACTION_CONFIRM = 8;
+export const ACTION_SAVE = 16;
+export const ACTION_MUTE = 32;
 
-export const ACTION_CONFIRM = 1;
-export const ACTION_PAUSE = 2;
+const KEYS = {
+  KeyW: 'up', ArrowUp: 'up',
+  KeyS: 'down', ArrowDown: 'down',
+  KeyA: 'left', ArrowLeft: 'left',
+  KeyD: 'right', ArrowRight: 'right',
+  ShiftLeft: 'run', ShiftRight: 'run',
+};
 
-const LEFT = new Set(['ArrowLeft', 'KeyA']);
-const RIGHT = new Set(['ArrowRight', 'KeyD']);
-const CONFIRM = new Set(['Space', 'Enter']);
-const PAUSE = new Set(['KeyP', 'Escape']);
-
-export function createInput(target) {
-  let left = false;
-  let right = false;
+export function createInput(canvas) {
+  const held = { up: false, down: false, left: false, right: false, run: false };
   let actions = 0;
+  let mouse = { x: 0, y: 0 };
 
   window.addEventListener('keydown', (event) => {
-    if (LEFT.has(event.code)) left = true;
-    else if (RIGHT.has(event.code)) right = true;
-    else if (CONFIRM.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_CONFIRM;
-    } else if (PAUSE.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_PAUSE;
-    } else return;
-    event.preventDefault();
+    const name = KEYS[event.code];
+    if (name) {
+      held[name] = true;
+      event.preventDefault();
+      return;
+    }
+    if (event.repeat) return;
+    if (event.code === 'KeyE') actions |= ACTION_ENTER;
+    else if (event.code === 'Space') { actions |= ACTION_SHOOT; event.preventDefault(); }
+    else if (event.code === 'KeyP' || event.code === 'Escape') actions |= ACTION_PAUSE;
+    else if (event.code === 'Enter') actions |= ACTION_CONFIRM;
+    else if (event.code === 'KeyQ') actions |= ACTION_SAVE;
+    else if (event.code === 'KeyM') actions |= ACTION_MUTE;
   });
   window.addEventListener('keyup', (event) => {
-    if (LEFT.has(event.code)) left = false;
-    else if (RIGHT.has(event.code)) right = false;
+    const name = KEYS[event.code];
+    if (name) held[name] = false;
   });
-  // A key released while the tab is hidden never sends keyup: let go of everything on blur.
   window.addEventListener('blur', () => {
-    left = false;
-    right = false;
+    held.up = held.down = held.left = held.right = held.run = false;
   });
-  target.addEventListener('pointerdown', () => {
+  canvas.addEventListener('pointermove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  });
+  canvas.addEventListener('pointerdown', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse = { x: event.clientX - rect.left, y: event.clientY - rect.top };
     actions |= ACTION_CONFIRM;
   });
 
   return {
-    /** -1 for left, 1 for right, 0 for neither or both. */
-    direction() {
-      return (right ? 1 : 0) - (left ? 1 : 0);
-    },
-    /** The one-shot presses since the last call, as ACTION_* flags. */
+    held,
+    mouse() { return mouse; },
     takeActions() {
       const taken = actions;
       actions = 0;

@@ -1,61 +1,68 @@
-// Every tuning number and colour in one place. The playfield is a fixed 1280x720 logical area;
-// the renderer scales it to the window, so no rule below depends on the screen size.
+// Solmar Bay — tuning, palette and world constants. Every number the game
+// balances on lives here so the other files read like rules, not magic numbers.
+export const WORLD = { width: 3200, height: 2400 };
 
-export const FIELD = { width: 1280, height: 720, groundY: 664 };
+// Streets run on a grid: avenues every 320 px, streets every 300 px.
+export const ROADS = {
+  avenues: [160, 480, 800, 1120, 1440, 1760, 2080, 2400, 2720, 3040],
+  streets: [140, 440, 740, 1040, 1340, 1640, 1940],
+  width: 64,
+  lane: 15,
+};
 
-/** The simulation's fixed step, in seconds: 60 updates a second whatever the display's rate. */
+export const BEACH = { sandTop: 2050, waterTop: 2260 };
 export const STEP = 1 / 60;
+export const VIEW = { width: 1280, height: 720 };
 
 export const PLAYER = {
-  width: 72,
-  height: 24,
-  speed: 560,
-  invulnerable: 1.5,
+  walkSpeed: 230,
+  runSpeed: 330,
+  radius: 14,
+  maxHealth: 100,
 };
 
-export const LIVES = 3;
-
-export const BLOCK = {
-  minWidth: 40,
-  maxWidth: 110,
-  height: 36,
-  speed: 240,
-  speedPerLevel: 30,
-  speedJitter: 90,
-  interval: 0.55,
-  intervalScale: 0.88,
-  minInterval: 0.14,
-  dodgePoints: 1,
+export const CAR = {
+  length: 54,
+  width: 26,
+  accel: 420,
+  brake: 700,
+  reverseAccel: 220,
+  maxSpeed: 560,
+  maxReverse: 160,
+  turnRate: 2.6,
+  grip: 0.94,
 };
 
-export const COIN = {
-  size: 24,
-  speed: 190,
-  speedPerLevel: 14,
-  interval: 1.4,
-  intervalJitter: 0.8,
-  points: 10,
+export const WANTED = {
+  maxStars: 5,
+  decaySeconds: 26,
+  copsPerStar: [0, 2, 3, 4, 6, 8],
 };
-
-/** Seconds of play per level, and the last level: speeds and spawn rates stop growing there. */
-export const LEVEL = { seconds: 12, max: 12 };
-
-/** How many falling things can exist at once; the pool is allocated once, at boot. */
-export const POOL_SIZE = 64;
 
 export const PALETTE = {
-  backdrop: '#11141b',
-  sky: '#1b1f2a',
-  ground: '#2a3040',
-  player: '#4fc3f7',
-  block: '#e5534b',
-  coin: '#f2c94c',
-  panel: '#252b38',
-  text: '#eef1f5',
-  muted: '#8b93a3',
+  grass: '#7fae62',
+  park: '#5d9b4a',
+  sand: '#e8d39a',
+  water: '#2f7fb8',
+  waterDeep: '#1f5f92',
+  road: '#3a3f47',
+  roadEdge: '#2c3038',
+  sidewalk: '#9aa0a8',
+  lane: '#e8d44d',
+  buildingRoof: ['#b5674e', '#4e7ba6', '#8a6fb0', '#c08a3e', '#5fa08a', '#a65a6e', '#6b7f9e', '#c97b4a'],
+  buildingEdge: '#2e2a26',
+  windowLit: '#ffd97a',
+  windowDark: '#2c3a4a',
+  player: '#ffcf3f',
+  police: '#1c4fd7',
+  taxi: '#f2c230',
+  hud: '#101820',
+  hudText: '#f4f6f8',
+  gold: '#ffd24d',
+  danger: '#ff4d4d',
+  mission: '#ffe14d',
 };
 
 export const FONT = 'system-ui, -apple-system, "Segoe UI", sans-serif';
-
-/** Where the best score is kept between visits (this browser only). */
-export const BEST_KEY = 'block-dodger.best';
+export const SAVE_KEY = 'solmar-bay.save.v1';
+export const BEST_KEY = 'solmar-bay.best';
